@@ -15,9 +15,12 @@ public:
 	UINT64 MakeNewGuid();
 
 	VOID   SetMaxOnline(INT32 nNum);
+
 	UINT32 GetMaxOnline();
 
-	BOOL   SetDataChange();
+	BOOL   SetExData(INT32 nIndex, INT32 dwData);
+
+	INT32 GetExData(INT32 nIndex);
 
 public:
 	GlobalDataObject*  m_pGlobalDataObject;

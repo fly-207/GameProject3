@@ -54,7 +54,7 @@ BOOL ServiceBase::StartNetwork(UINT16 nPortNum, UINT32 nMaxConn, IPacketDispatch
 
 	m_pPacketDispatcher = pDispather;
 
-	if (!CNetManager::GetInstancePtr()->Start(nPortNum, nMaxConn, this))
+	if (!CNetManager::GetInstancePtr()->Start(nPortNum, nMaxConn, this, strListenIp))
 	{
 		CLog::GetInstancePtr()->LogError("启动网络层失败!");
 		return FALSE;
@@ -64,6 +64,7 @@ BOOL ServiceBase::StartNetwork(UINT16 nPortNum, UINT32 nMaxConn, IPacketDispatch
 	m_dwRecvNum = 0;
 	m_dwFps = 0;
 	m_dwSendNum = 0;
+	m_dwLastMsgID = 0;
 	return TRUE;
 }
 
@@ -72,8 +73,6 @@ BOOL ServiceBase::StopNetwork()
 	CLog::GetInstancePtr()->LogError("==========服务器开始关闭=======================");
 
 	CNetManager::GetInstancePtr()->Stop();
-
-	CLog::GetInstancePtr()->Close();
 
 	return TRUE;
 }
@@ -203,7 +202,15 @@ BOOL ServiceBase::Update()
 			}
 			else
 			{
+				//try
+				//{
+				m_dwLastMsgID = item.m_dwMsgID;
 				m_pPacketDispatcher->DispatchPacket(&item);
+				//}
+				//catch (std::exception& e)
+				//{
+				//	CLog::GetInstancePtr()->LogError("DispatchPacket Message Error %s, MessageID:%d", e.what(), item.m_dwMsgID);
+				//}
 
 				item.m_pDataBuffer->Release();
 

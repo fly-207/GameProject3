@@ -3,7 +3,7 @@
 #include "ModuleBase.h"
 #include "MailData.h"
 #include "../ServerData/ServerDefine.h"
-
+#include "../Message/Game_Define.pb.h"
 struct MailDataObject;
 class CMailModule  : public CModuleBase
 {
@@ -37,7 +37,7 @@ public:
 
 	BOOL DeleteMailByGroupID(UINT64 uGuid);
 
-	BOOL AddMail(std::string& strSender, std::string& strTitle, std::string& strContent, std::vector<StMailItem>& vtItems);
+	BOOL AddMail(EMailType eMailType, std::string& strSender, std::string& strTitle, std::string& strContent, std::vector<StMailItem>& vtItems);
 
 	MailDataObject* GetMailByGuid(UINT64 uGuid);
 
@@ -46,9 +46,6 @@ public:
 	BOOL NotifyChange();
 public:
 	std::map<UINT64, MailDataObject*> m_mapMailData;
-
-	std::set<UINT64> m_setChange;
-	std::set<UINT64> m_setRemove;
 };
 
 #endif //__MAIL_MODULE_H__

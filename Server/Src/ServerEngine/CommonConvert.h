@@ -15,7 +15,7 @@ FLOAT StringToFloat(char* pStr);
 
 FLOAT StringToFloat(const char* pStr);
 
-DOUBLE StringToDouble(char* pStr);
+DOUBLE StringToDouble(const char* pStr);
 
 std::string DoubleToString(DOUBLE dValue);
 
@@ -60,7 +60,9 @@ BOOL StringToVector(const char* pStrValue, FLOAT FloatVector[], INT32 nSize, cha
 
 UINT32 VersionToInt(const std::string& strVersion);
 
-INT32  CountSymbol(char* pStr, char cSymbol);
+INT32 CountSymbol(char* pStr, char cSymbol);
+
+BOOL HasSymbol(const char* pStr, const char* pszSymbol);
 
 BOOL StringTrim(std::string& strValue);
 

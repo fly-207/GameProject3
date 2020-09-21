@@ -207,11 +207,8 @@ BOOL CConnection::ExtractBuffer()
 		//在这里对包头进行检查, 如果不合法就要返回FALSE;
 		if (!CheckHeader(m_pBufPos))
 		{
-			CLog::GetInstancePtr()->LogError("ExtractBuffer Error， 验证包头序号失败!!");
-			return FALSE;
+			//return FALSE;
 		}
-
-		ERROR_RETURN_FALSE(pHeader->dwSize != 0);
 
 		UINT32 dwPacketSize = pHeader->dwSize;
 
@@ -369,9 +366,9 @@ BOOL CConnection::Reset()
 	if(m_pCurRecvBuffer != NULL)
 	{
 		m_pCurRecvBuffer->Release();
+		m_pCurRecvBuffer = NULL;
 	}
 
-	m_pCurRecvBuffer = NULL;
 
 	m_nCheckNo = 0;
 
@@ -410,6 +407,12 @@ BOOL CConnection::CheckHeader(CHAR* m_pPacket)
 		return FALSE;
 	}
 
+	if (pHeader->dwSize <= 0)
+	{
+		CLog::GetInstancePtr()->LogError("验证-失败 pHeader->dwSize <= 0, pHeader->dwMsgID:%d", pHeader->dwSize, pHeader->dwMsgID);
+		return FALSE;
+	}
+
 	if (pHeader->dwMsgID > 4999999)
 	{
 		return FALSE;
@@ -417,7 +420,7 @@ BOOL CConnection::CheckHeader(CHAR* m_pPacket)
 
 	if(m_nCheckNo == 0)
 	{
-		m_nCheckNo = pHeader->dwPacketNo - (pHeader->dwMsgID ^ pHeader->dwSize);
+		m_nCheckNo = pHeader->dwPacketNo - (pHeader->dwMsgID ^ pHeader->dwSize) + 1;
 		return TRUE;
 	}
 
@@ -427,7 +430,7 @@ BOOL CConnection::CheckHeader(CHAR* m_pPacket)
 		return TRUE;
 	}
 
-	return TRUE;
+	return FALSE;
 }
 
 UINT32 CConnection::GetIpAddr(BOOL bHost)
@@ -514,7 +517,7 @@ BOOL CConnection::DoSend()
 	{
 		if(dwSendBytes < DataBuf.len)
 		{
-			CLog::GetInstancePtr()->LogError("发送线程:直接发送功数据send:%d--Len:%d!", dwSendBytes, DataBuf.len);
+			CLog::GetInstancePtr()->LogError("发送线程:直接发送数据成功send:%d--Len:%d!", dwSendBytes, DataBuf.len);
 		}
 	}
 	else if( nRet == -1 ) //发送出错
@@ -546,7 +549,7 @@ BOOL CConnection::DoSend()
 	//}
 	// #define E_SEND_SUCCESS				1
 	// #define E_SEND_UNDONE				2
-	// #define E_SEND_ERROR				3
+	// #define E_SEND_ERROR				    3
 
 
 	if (m_pSendingBuffer != NULL)

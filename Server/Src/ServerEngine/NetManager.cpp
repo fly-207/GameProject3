@@ -84,13 +84,20 @@ BOOL CNetManager::WorkThread_Listen()
 	return TRUE;
 }
 
-BOOL CNetManager::StartNetListen(UINT16 nPortNum)
+BOOL CNetManager::StartNetListen(UINT16 nPortNum, std::string strIpAddr)
 {
 	sockaddr_in SvrAddr;
 	SvrAddr.sin_family		= AF_INET;
 	SvrAddr.sin_port		= htons(nPortNum);
 
-	SvrAddr.sin_addr.s_addr = htonl(INADDR_ANY);		//支持多IP地址监听
+	if (strIpAddr.size() <= 1)
+	{
+		SvrAddr.sin_addr.s_addr = htonl(INADDR_ANY);		//支持多IP地址监听
+	}
+	else
+	{
+		SvrAddr.sin_addr.s_addr = CommonSocket::IpAddrStrToInt(strIpAddr.c_str());
+	}
 
 	m_hListenSocket = CommonSocket::CreateSocket(AF_INET, SOCK_STREAM, 0);
 	if(m_hListenSocket == INVALID_SOCKET)
@@ -418,7 +425,12 @@ BOOL CNetManager::WorkThread_ProcessEvent(UINT32 nParam)
 		nFd = epoll_wait(m_hCompletePort, vtEvents, 512, 500);
 		if (nFd == -1)
 		{
-			CLog::GetInstancePtr()->LogError("epoll_wait失败 原因:%s", CommonFunc::GetLastErrorStr(errno).c_str());
+			if (errno != EINTR)
+			{
+				CLog::GetInstancePtr()->LogError("epoll_wait失败 原因:%s", CommonFunc::GetLastErrorStr(errno).c_str());
+				return -1;
+			}
+
 			continue;
 		}
 
@@ -578,7 +590,7 @@ BOOL CNetManager::EventDelete(CConnection* pConnection)
 #endif
 
 
-BOOL CNetManager::Start(UINT16 nPortNum, UINT32 nMaxConn, IDataHandler* pBufferHandler)
+BOOL CNetManager::Start(UINT16 nPortNum, UINT32 nMaxConn, IDataHandler* pBufferHandler, std::string strIpAddr)
 {
 	ERROR_RETURN_FALSE(pBufferHandler != NULL);
 
@@ -604,15 +616,11 @@ BOOL CNetManager::Start(UINT16 nPortNum, UINT32 nMaxConn, IDataHandler* pBufferH
 		return FALSE;
 	}
 
-	if(!StartNetListen(nPortNum))
+	if(!StartNetListen(nPortNum, strIpAddr))
 	{
 		CLog::GetInstancePtr()->LogError("开启监听失败！！");
 		return FALSE;
 	}
-
-#ifndef WIN32
-	ClearSignal();
-#endif
 
 	return TRUE;
 }

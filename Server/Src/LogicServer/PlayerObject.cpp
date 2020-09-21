@@ -20,7 +20,7 @@
 #include "FriendModule.h"
 #include "ServerDefine.h"
 #include "RoleData.h"
-#include "../StaticData/StaticData.h"
+#include "StaticData.h"
 #include "CopyData.h"
 #include "../Message/Msg_ID.pb.h"
 #include "../Message/Msg_RetCode.pb.h"
@@ -101,11 +101,6 @@ BOOL CPlayerObject::OnLogin()
 
 	CRoleModule* pRoleModule = (CRoleModule*)GetModuleByType(MT_ROLE);
 	ERROR_RETURN_VALUE(pRoleModule != NULL, MRC_UNKNOW_ERROR);
-
-	if (pRoleModule->GetLastLogoffTime() < pRoleModule->GetLastLogonTime())
-	{
-		pRoleModule->SetLastLogoffTime(pRoleModule->GetLastLogonTime() + 5);
-	}
 
 	if (!CommonFunc::IsSameDay(pRoleModule->GetLastLogoffTime()))
 	{
